@@ -44,20 +44,26 @@ class SQLHelper(object):
 		conn.close()
 
 	@classmethod
-	def fetch_one(cls, sql, **args):
+	def fetch_one(cls, sql, args):
 		conn, cursor = cls.open()
-		cursor.execute(sql, **args)
+		cursor.execute(sql, args)
 		obj = cursor.fetchone()
 		cls.close(conn, cursor)
 		return obj
 
 	@classmethod
-	def fetch_all(cls, sql, **args):
+	def fetch_all(cls, sql, args):
 		conn, cursor = cls.open()
-		cursor.execute(sql, **args)
+		cursor.execute(sql, args)
 		obj = cursor.fetchall()
 		cls.close(conn, cursor)
 		return obj
+
+	@classmethod
+	def write_db(cls, sql, args):
+		conn, cursor = cls.open()
+		cursor.execute(sql, args)
+		cls.close(conn, cursor)
 
 
 if __name__ == '__main__':

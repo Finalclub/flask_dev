@@ -8,8 +8,8 @@
 from flask import Flask
 from flask_session import Session
 from views import account
-from views import admin
-from views import user
+from views import home
+from exts.auth import Auth
 
 
 def create_app():
@@ -18,8 +18,10 @@ def create_app():
 
 
 	app.register_blueprint(account.ac)
-	# app.register_blueprint(admin)
+	app.register_blueprint(home.hm)
 
+	# auth = Auth()
+	# auth.init_app(app=app)
 	Session(app=app)
 
 	return app
