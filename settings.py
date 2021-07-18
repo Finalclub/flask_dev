@@ -42,3 +42,9 @@ class DevelopmentConfig(BaseConfig):
 		database='dev_study',
 		charset='utf8'
 	)
+	BASEURL = 'mysql+{}://{}:{}@localhost:3306/dev_study?charset={}'
+	SQLALCHEMY_DATABASE_URI = BASEURL.format('pymysql', 'luka', 'ps897570831', 'utf8')
+	SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+
+
