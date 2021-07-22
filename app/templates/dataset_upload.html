@@ -7,7 +7,7 @@
   <meta name="author" content="ThemeBucket">
   <link rel="shortcut icon" href="#" type="image/png">
 
-  <title>Flot Charts</title>
+  <title>特征选择算法平台</title>
 
   <link href="../static/css/style.css" rel="stylesheet">
   <link href="../static/css/style-responsive.css" rel="stylesheet">
@@ -27,53 +27,38 @@
 
         <!--logo and iconic logo start-->
         <div class="logo">
-            <a href="index.html"><img src="../static/images/logo.png" alt=""></a>
+            <a href="{{ url_for('home.index') }}"><img src="../static/images/logo.png" alt=""></a>
         </div>
 
         <div class="logo-icon text-center">
-            <a href="index.html"><img src="../static/images/logo_icon.png" alt=""></a>
+            <a href="{{ url_for('home.index') }}"><img src="../static/images/logo_icon.png" alt=""></a>
         </div>
         <!--logo and iconic logo end-->
 
         <div class="left-side-inner">
 
             <!-- visible to small devices only -->
-            <div class="visible-xs hidden-sm hidden-md hidden-lg">
-                <div class="media logged-user">
-                    <img alt="" src="../static/images/photos/user-avatar.png" class="media-object">
-                    <div class="media-body">
-                        <h4><a href="#">John Doe</a></h4>
-                        <span>"Hello There..."</span>
-                    </div>
-                </div>
-
-                <h5 class="left-nav-title">Account Information</h5>
-                <ul class="nav nav-pills nav-stacked custom-nav">
-                  <li><a href="#"><i class="fa fa-user"></i> <span>Profile</span></a></li>
-                  <li><a href="#"><i class="fa fa-cog"></i> <span>Settings</span></a></li>
-                  <li><a href="#"><i class="fa fa-sign-out"></i> <span>Sign Out</span></a></li>
-                </ul>
-            </div>
 
             <!--sidebar nav start-->
-            <ul class="nav nav-pills nav-stacked custom-nav">
-                <li class="menu-list nav-active"><a href="index_dataset.html"><i class="fa fa-book"></i> <span>数据集管理</span></a>
+           <ul class="nav nav-pills nav-stacked custom-nav">
+                <li class="menu-list"><a href="index.html"><i class="fa fa-book"></i> <span>数据集管理</span></a>
                     <ul class="sub-menu-list">
-                        <li class="active"><a href="dataset_upload.html"> 数据集上传</a></li>
-                        <li><a href="dataset_infor.html"> 数据集信息</a></li>
+                        <li><a href="{{ url_for('home.dataset_infor') }}"> 数据集信息</a></li>
+                        <li class="active"><a href="{{ url_for('home.dataset_upload') }}"> 数据集上传</a></li>
                     </ul>
                 </li>
 
-                 <li class="menu-list"><a href=""><i class="fa fa-laptop"></i> <span>特征选择算法</span></a>
+                <li class="menu-list"><a href=""><i class="fa fa-laptop"></i> <span>特征选择算法</span></a>
                     <ul class="sub-menu-list">
-                        <li><a href="dataset_upload.html">邻域熵特征选择算法</a></li>
-                        <li><a href="dataset_infor.html">量子樽海鞘特征选择算法</a></li>
+                        <li><a href="{{ url_for('home.nefs') }}">邻域熵特征选择算法</a></li>
+                        <li><a href="{{ url_for('home.qssafs') }}">量子樽海鞘特征选择算法</a></li>
                     </ul>
                 </li>
-                    <li class="menu-list"><a href=""><i class="fa fa-laptop"></i> <span>分类实验</span></a>
+                <li class="menu-list"><a href=""><i class="fa fa-laptop"></i> <span>分类实验</span></a>
 
                 </li>
-                <li><a href="auth/login.html"><i class="fa fa-sign-in"></i> <span>登出</span></a></li>
+                <li><a href="{{ url_for('home.user_infor', user=current_user.name) }}"><i class="fa fa-sign-in"></i> <span>用户信息管理</span></a></li>
+                <li><a href="{{ url_for('home.logout') }}"><i class="fa fa-sign-in"></i> <span>登出</span></a></li>
 
             </ul>
             <!--sidebar nav end-->
@@ -86,7 +71,6 @@
     <div class="main-content" >
 
         <!-- header section start-->
-        <div class="header-section">
 
         <div class="header-section">
 
@@ -96,194 +80,73 @@
             <!--notification menu start -->
             <div class="menu-right">
                 <ul class="notification-menu"></ul>
-                <p style="font-size: 25px; text-align: left"> 你好，{{current_user}} </p>
+                <p style="font-size: 25px; text-align: left"> 你好，{{current_user.name}} </p>
             </div>
             <!--notification menu end -->
 
         </div>
-        <!--notification menu end -->
 
-        </div>
         <!-- header section end-->
+
 
         <!-- page heading start-->
         <div class="page-heading">
             <h3>
-                Flot Charts
+                数据集上传
             </h3>
-            <ul class="breadcrumb">
-                <li>
-                    <a href="#">Charts</a>
-                </li>
-                <li class="active"> Flot Charts </li>
-            </ul>
+
         </div>
+
         <!-- page heading end-->
-
         <!--body wrapper start-->
-        <div class="wrapper">
+        <section class="wrapper">
             <div class="row">
-                <div class="col-sm-12">
-                    <section class="panel">
-                        <header class="panel-heading">
-                            Area Chart
-                        <span class="tools pull-right">
-                            <a href="javascript:;" class="fa fa-chevron-down"></a>
-                            <a href="javascript:;" class="fa fa-times"></a>
-                         </span>
-                        </header>
-                        <div class="panel-body">
-                            <div id="visitors-chart">
-                                <div id="visitors-container" style="width: 100%;height:300px; text-align: center; margin:0 auto;">
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-sm-12">
-                    <section class="panel">
-                        <header class="panel-heading">
-                            Real Time Chart
-                        <span class="tools pull-right">
-                            <a href="javascript:;" class="fa fa-chevron-down"></a>
-                            <a href="javascript:;" class="fa fa-times"></a>
-                         </span>
-                        </header>
-                        <div class="panel-body">
-                            <div id="reatltime-chart">
-                                <div id="reatltime-chartContainer" style="width:100%;height:300px; text-align: center; margin:0 auto;">
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-sm-6">
-                    <section class="panel">
-                        <header class="panel-heading">
-                            Pie Chart
-                        <span class="tools pull-right">
-                            <a href="javascript:;" class="fa fa-chevron-down"></a>
-                            <a href="javascript:;" class="fa fa-times"></a>
-                         </span>
-                        </header>
-                        <div class="panel-body">
-                            <div id="pie-chart" class="pie-chart">
-                                <div id="pie-chartContainer" style="width: 100%;height:400px; text-align: left;">
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                </div>
-                <div class="col-sm-6">
-                    <section class="panel">
-                        <header class="panel-heading">
-                            Donut Chart
-                        <span class="tools pull-right">
-                            <a href="javascript:;" class="fa fa-chevron-down"></a>
-                            <a href="javascript:;" class="fa fa-times"></a>
-                         </span>
-                        </header>
-                        <div class="panel-body">
-                            <div id="pie-chart-donut" class="pie-chart">
-                                <div id="pie-donutContainer" style="width: 100%;height:400px; text-align: left;">
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-sm-12">
-                    <section class="panel">
-                        <header class="panel-heading">
-                            Combined Chart
-                        <span class="tools pull-right">
-                            <a href="javascript:;" class="fa fa-chevron-down"></a>
-                            <a href="javascript:;" class="fa fa-times"></a>
-                         </span>
-                        </header>
-                        <div class="panel-body">
-                            <div id="combine-chart">
-                                <div id="legendcontainer26" class="legend-block">
-                                </div>
-                                <div id="combine-chartContainer" style="width: 100%;height:300px; text-align: center; margin:0 auto;">
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-sm-12">
-                    <section class="panel">
-                        <header class="panel-heading">
-                            Toggle Chart
-                        <span class="tools pull-right">
-                            <a href="javascript:;" class="fa fa-chevron-down"></a>
-                            <a href="javascript:;" class="fa fa-times"></a>
-                         </span>
-                        </header>
-                        <div class="panel-body">
-                            <div id="toggle-chart">
-                                <div class="clearfix">
-                                    <form class="form-horizontal pull-left chart-control">
-                                        <div class="control-group">
-                                            <label class="control-label">Chart Type :</label>
-                                            <div class="series-list">
-                                                <label class="checkbox inline">
-                                                    <input id="chartType1" checked name="ct" type="radio" value="line"/>
-                                                    Line Chart</label>
-                                                <label class="checkbox inline">
-                                                    <input id="chartType2" name="ct" type="radio" value="bar"/>
-                                                    Bar Chart </label>
+            <div class="col-lg-6">
+                <section class="panel">
+                    <header class="panel-heading">
+                        Basic Forms
+                    </header>
+                    <div class="panel-body">
+                        <form role="form", action="" method="post" enctype="multipart/form-data">
+                            {{ form.csrf_token }}
+                            <div class="form-group">
+                                <label for="exampleInputFile">输入文件</label>
+                                <input type="file" id="exampleInputFile" name="file">
+                                <p class="help-block">选择数据集类型</p>
+                                <div class="col-sm-9 icheck minimal">
+                                        <div class="minimal-red single-row">
+<!--                                            <div class="radio ">-->
+                                            <div>
+                                                {{ form.types()}}
                                             </div>
                                         </div>
-                                    </form>
-                                    <form class="form-horizontal chart-control pull-right chart-control">
-                                        <div class="control-group ">
-                                            <label class="control-label"> Toggle series :</label>
-                                            <div class="series-list">
-                                                <label class="checkbox inline">
-                                                    <input type="checkbox" id="cbdata1" checked>
-                                                    data1</label>
-                                                <label class="checkbox inline">
-                                                    <input type="checkbox" id="cbdata2" checked>
-                                                    data2 </label>
-                                                <label class="checkbox inline">
-                                                    <input type="checkbox" id="cbdata3" checked>
-                                                    data3 </label>
-                                            </div>
+
+                                        <div class="minimal-green single-row">
                                         </div>
-                                    </form>
                                 </div>
-                                <div id="legendPlaceholder20">
-                                </div>
-                                <div id="toggle-chartContainer" style="width: 100%;height:300px; text-align: left;">
-                                </div>
+                                    <input type="text" class="form-control" name="desc" placeholder="请输入描述信息">
                             </div>
-                        </div>
-                    </section>
-                </div>
+                            <input type="submit" class="btn btn-primary">
+                        </form>
+
+                    </div>
+                </section>
             </div>
         </div>
-        <!--body wrapper end-->
+        </section>
+        <!-- page start-->
+        <!--body wrapper start-->
 
+        <!--body wrapper end-->
+        </div>
         <!--footer section start-->
         <footer>
-            2014 &copy; AdminEx by ThemeBucket
+            2021 &copy; SouthwestJiaotong University
         </footer>
         <!--footer section end-->
 
 
-    </div>
+
     <!-- main content end-->
 </section>
 

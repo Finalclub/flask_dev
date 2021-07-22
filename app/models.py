@@ -21,11 +21,13 @@ from app import db, login
 
 
 class User(UserMixin, db.Model):
-	id = db.Column(db.Integer, primary_key=True)
-	name = db.Column(db.String(64), index=True, unique=True)
-	pwd = db.Column(db.String(128))
-	email = db.Column(db.String(120), index=True, unique=True)
-	type = db.Column(db.Integer, db.ForeignKey('auth.id'))
+	id = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
+	name = db.Column(db.String(64), unique=True)
+	pwd_hash = db.Column(db.String(128))
+	email = db.Column(db.String(120))
+	type = db.Column(db.Integer, db.ForeignKey('auth.id_auth'), default=0)
+	last_seen = db.Column(db.DateTime, default=datetime.now)
+	# auths = db.relationship('Auth', backref='auth', lazy='select')
 
 	def set_password(self, pwd):
 		self.pwd_hash = generate_password_hash(pwd)
@@ -35,7 +37,7 @@ class User(UserMixin, db.Model):
 
 
 class Auth(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
+	id_auth = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
 	name = db.Column(db.String(64), index=True, unique=True)
 	created_date = db.Column(db.DateTime, default=datetime.now)
 	# 记录修改时间
@@ -43,27 +45,21 @@ class Auth(db.Model):
 
 
 class Dataset(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
+	id = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
 	name = db.Column(db.String(64), index=True)
 	sample_count = db.Column(db.Integer)
 	feature_count = db.Column(db.Integer)
-	format = db.Column(db.String(64), unique=True)
-	ground_truth = db.Column(db.Integer, db.ForeignKey('gt.id'))
+	format = db.Column(db.String(64))
+	description = db.Column(db.TEXT)
 	created_date = db.Column(db.DateTime, default=datetime.now)
 	file_path = db.Column(db.String(120))
-	dataset_type = db.Column(db.Integer, db.ForeignKey('datatype.id'))
-
-
-class GT(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
-	name = db.Column(db.String(64), index=True, unique=True)
-	sample_count = db.Column(db.Integer)
-	created_date = db.Column(db.DateTime, default=datetime.now)
-	file_path = db.Column(db.String(120), index=True)
+	dataset_type = db.Column(db.Integer, db.ForeignKey('datatype.id_dtype'))
+	uri_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	users = db.relationship('User', backref='users', lazy='select')
 
 
 class BS(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
+	id = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
 	name = db.Column(db.String(64), index=True, unique=True)
 	created_date = db.Column(db.DateTime, default=datetime.now)
 	# 记录修改时间
@@ -71,7 +67,7 @@ class BS(db.Model):
 
 
 class Classifer(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
+	id = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
 	name = db.Column(db.String(64), index=True, unique=True)
 	created_date = db.Column(db.DateTime, default=datetime.now)
 	# 记录修改时间
@@ -79,7 +75,7 @@ class Classifer(db.Model):
 
 
 class Datatype(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
+	id_dtype = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
 	name = db.Column(db.String(64), index=True, unique=True)
 	created_date = db.Column(db.DateTime, default=datetime.now)
 

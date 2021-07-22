@@ -23,7 +23,8 @@
 
 <div class="container">
 
-    <form class="form-signin" method="post" name="loginForm" id="loginForm">
+    <form class="form-signin" method="post" name="registerForm" id="registerForm">
+        {{ form.csrf_token }}
         <div class="form-signin-heading text-center">
             <h1 class="sign-title">用户信息注册</h1>
             <img src="../../static/images/login-logo.png" alt=""/>
@@ -58,7 +59,9 @@
          <!--   <label class="checkbox">
                 <input type="checkbox" value="agree this condition"> I agree to the Terms of Service and Privacy Policy
             </label>  -->
-            <input type="submit" value="提交">
+            <div style="text-align:center" >
+                    {{ form.submit() }}
+            </div>
 
       <!--      <button type="submit" class="btn btn-lg btn-login btn-block">
                 <i class="fa fa-check"></i>

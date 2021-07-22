@@ -24,6 +24,7 @@
 <div class="container">
 
     <form class="form-signin" method="post" name="loginForm" id="loginForm">
+        {{ form.csrf_token }}
  <!--   <form method="post" name="loginForm" id="loginForm"> -->
         <div class="form-signin-heading text-center">
             <h1 class="sign-title">特征选择算法平台</h1>
@@ -42,8 +43,7 @@
                     {{ form.submit() }}
                 </div>
                 <div style="text-align:center">
-                    <a href="{{url_for('account.register')}}" class="btn">注册</a>
-        <!--            <input type="submit" value="注册">     -->
+                    还没账号？<a href="{{url_for('account.register')}}" class="btn">点击注册</a>
                 </div>
                 <div>
                     <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
@@ -53,6 +53,7 @@
         </div>
 
    </form>
+
 
 </div>
 

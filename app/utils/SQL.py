@@ -34,7 +34,7 @@ class SQLHelper(object):
 					charset='utf8'
 				)
 		conn = pool.connection()
-		cursor = conn.cursor(cursor=pymysql.cursors.DictCursor)
+		cursor = conn.cursor()
 		return conn, cursor
 
 	@staticmethod
@@ -44,7 +44,7 @@ class SQLHelper(object):
 		conn.close()
 
 	@classmethod
-	def fetch_one(cls, sql, args):
+	def fetch_one(cls, sql, args=None):
 		conn, cursor = cls.open()
 		cursor.execute(sql, args)
 		obj = cursor.fetchone()
@@ -52,7 +52,7 @@ class SQLHelper(object):
 		return obj
 
 	@classmethod
-	def fetch_all(cls, sql, args):
+	def fetch_all(cls, sql, args=None):
 		conn, cursor = cls.open()
 		cursor.execute(sql, args)
 		obj = cursor.fetchall()
@@ -60,7 +60,7 @@ class SQLHelper(object):
 		return obj
 
 	@classmethod
-	def write_db(cls, sql, args):
+	def write_db(cls, sql, args=None):
 		conn, cursor = cls.open()
 		cursor.execute(sql, args)
 		cls.close(conn, cursor)
