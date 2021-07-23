@@ -10,6 +10,7 @@ from app.plugins.LSH.readimage import ReadImage
 import json
 import numpy as np
 
+
 def get_algorithm_args(form, type:str):
 	d_id = form.dataset.data
 	l_id = form.labels.data
@@ -17,10 +18,20 @@ def get_algorithm_args(form, type:str):
 	label_path = SQLHelper.fetch_one('select file_path from dataset where id = {}'.format(l_id))
 	if type == 'ne':
 		return dataset_path, label_path, form.k.data, \
-		    	form.w.data, form.L.data, form.n_bands.data
+				form.w.data, form.L.data, form.n_bands.data
 	elif type == 'ssa':
 		return dataset_path, label_path, form.pop.data, \
 				form.max_iter.data, form.times.data
+	elif type == 'svm':
+		return dataset_path, label_path, form.test_set.data, \
+				form.subset.data
+	elif type == 'rf':
+		return dataset_path, label_path, form.test_set.data, \
+				form.subset.data, form.n_estimators.data, \
+				form.min_samples_split.data, form.min_samples_leaf.data
+	elif type == 'knn':
+		return dataset_path, label_path, form.test_set.data, \
+				form.subset.data, form.n_neighbors.data
 
 
 def get_data(path1, path2):

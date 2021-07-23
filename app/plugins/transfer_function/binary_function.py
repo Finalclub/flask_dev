@@ -6,11 +6,13 @@
 # @File   : binary_function.py
 
 import numpy as np
+import random
 import math
 
 
-def binary_function(transfered_array, type = 'v', **kwargs):
-	transfered_array = transfered_array.reshape((-1, max(transfered_array.shape)))
+def binary_function(transfered_array, type='v', **kwargs):
+	# print(kwargs['pop'], kwargs['dim'])
+	transfered_array = transfered_array.reshape((kwargs['pop'], kwargs['dim']))
 	array_size = transfered_array.shape
 	rand_array = np.random.uniform(0, 1, array_size)
 	result_array = np.zeros(array_size)
@@ -18,8 +20,8 @@ def binary_function(transfered_array, type = 'v', **kwargs):
 		# food position
 		result_array = np.where(rand_array <= transfered_array, 1, 0)
 		for index in range(array_size[0]):
-			if np.sum(result_array[index]) == 0:
-				result_array[index] = np.random.randint(0, 2, (1, array_size[1]))
+			while np.sum(result_array[index]) == 0:
+				result_array[index] = np.random.randint(0, 2, (1, kwargs['dim']))
 	return result_array
 
 

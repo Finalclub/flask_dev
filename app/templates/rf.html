@@ -53,13 +53,13 @@
                 <li class="menu-list"><a href=""><i class="fa fa-laptop"></i> <span>特征选择算法</span></a>
                     <ul class="sub-menu-list">
                         <li><a href="{{ url_for('home.nefs') }}">邻域熵特征选择算法</a></li>
-                        <li class="active"><a href="{{ url_for('home.qssafs') }}">量子樽海鞘特征选择算法</a></li>
+                        <li><a href="{{ url_for('home.qssafs') }}">量子樽海鞘特征选择算法</a></li>
                     </ul>
                 </li>
                 <li class="menu-list"><a href=""><i class="fa fa-laptop"></i> <span>分类实验</span></a>
                     <ul class="sub-menu-list">
                         <li><a href="{{ url_for('home.svm') }}">SVM</a></li>
-                        <li><a href="{{ url_for('home.rf') }}">Random Forest</a></li>
+                        <li class="active"><a href="{{ url_for('home.rf') }}">Random Forest</a></li>
                         <li><a href="{{ url_for('home.knn') }}">KNN</a></li>
                     </ul>
                 </li>
@@ -98,9 +98,9 @@
         <!-- page heading start-->
         <div class="page-heading">
             <h3>
-                基于量子樽海鞘和邻域熵的特征选择算法
+                基于Random Forest的分类实验
             </h3>
-            <p class="breadcrumb"> 选取数据集，设定参数</p>
+            <p class="breadcrumb">选取数据集和类标，设定分类器参数， 返回KC和OA值</p>
         </div>
 
         <!-- page heading end-->
@@ -128,13 +128,19 @@
 <!--                            </select>-->
                         </div>
                             <div class="form-group">
-                                <input type="number" class="form-control" name="pop" placeholder="填写种群个数">
+                                <input type="number" class="form-control" name="test_set" placeholder="填写测试集比例">
                             </div>
                             <div class="form-group">
-                                <input type="number" class="form-control" name="max_iter" placeholder="填写最大迭代次数">
+                                <input type="text" class="form-control" name="subset" placeholder="选填子集索引如:integer1, integer2,..., integerN, 不填写默认全特征">
                             </div>
                             <div class="form-group">
-                                <input type="number" class="form-control" name="times" placeholder="填写实验次数">
+                                <input type="number" class="form-control" name="n_estimators" placeholder="随机森林树的个数">
+                            </div>
+                            <div class="form-group">
+                                <input type="number" class="form-control" name="min_samples_split" placeholder="非叶子节点分离最小个数">
+                            </div>
+                            <div class="form-group">
+                                <input type="number" class="form-control" name="min_samples_leaf" placeholder="叶子节点最小样本个数">
                             </div>
                             <input type="submit" class="btn btn-primary">
                         </form>
@@ -159,7 +165,7 @@
                                     // send ajax POST request to start background job
                                     $.ajax({
                                         type: 'POST',
-                                        url: '/QSSA_task',
+                                        url: '/rf_task',
                                         success: function(data, status, request) {
                                             status_url = request.getResponseHeader('Location');
                                             update_progress(status_url, nanobar, div[0]);

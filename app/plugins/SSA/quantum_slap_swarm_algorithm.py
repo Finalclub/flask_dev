@@ -48,7 +48,7 @@ def fitness_fucntion(X, y, test_size, all_size, if_details=False, return_all=Fal
 
 	accuracy = neigh.score(X=x_test, y=y_test)
 	error = 1 - accuracy
-	NE = NEFS(inputarray=X, inputgt=y)
+	NE = NEFS(inputarray=X, inputgt=y, k=20, w=5, L=30)
 	# print('error:', error)
 	# print('length:{}, all_size:{}, ratio:{}'.format(length, all_size, length / all_size))
 	# print('NE:', NE)
@@ -62,6 +62,7 @@ def fitness_fucntion(X, y, test_size, all_size, if_details=False, return_all=Fal
 def fitness_calcuate(binary_population, dataset, labels, **kwargs):
 	fitness_dict = dict()
 	row_number = 0
+
 	for row in binary_population:
 	# 	获取选取波段的索引
 		band_index = [x for x, y in list(enumerate(row)) if y == 1]
@@ -83,7 +84,7 @@ def QSSA(n_population, max_iter, dataset, labels, trans_type, ub, lb):
 	salps_array = ps(agents_number=n_population, dim=dim, ub=ub, lb=lb, type='salp')
 	c2 = np.random.uniform(0, 1, (1, dim))
 	# binary
-	binary_array = bf(transfered_array=salps_array, type='v')
+	binary_array = bf(transfered_array=salps_array, type='v', dim=dim, pop=n_population)
 	# 计算第一次fitness，获取food position
 	fitness_dict = fitness_calcuate(binary_population=binary_array, dataset=dataset, labels=labels, test_size=0.2,
 									all_size=dim)
@@ -111,7 +112,7 @@ def QSSA(n_population, max_iter, dataset, labels, trans_type, ub, lb):
 		# transfer function
 		trans_position = trans_func(updated_positions, type=trans_type)
 		# binary position
-		updated_binary_position = bf(transfered_array=trans_position)
+		updated_binary_position = bf(transfered_array=trans_position, dim=dim, pop=n_population)
 		# updated_binary_food_position = bf(transfered_array=trans_position)
 		# updated_binary_food_position = updated_binary_food_position.reshape((1, -1))
 		# updated_binary_follower_position = bf(transfered_array=trans_follower_position)
@@ -125,8 +126,8 @@ def QSSA(n_population, max_iter, dataset, labels, trans_type, ub, lb):
 			food_position = updated_binary_position[temp_best_index]
 			best_fitness = temp_best_fitness
 		cur_iter += 1
-		print('Current best:', food_position)
-		print('Current best fitness:', best_fitness)
+		# print('Current best:', food_position)
+		# print('Current best fitness:', best_fitness)
 		# updated positions
 		lead_position = updated_binary_position[temp_best_index]
 		followers_set = set([x for x in fitness_dict.keys()])
@@ -138,7 +139,10 @@ def QSSA(n_population, max_iter, dataset, labels, trans_type, ub, lb):
 		updated_salps_array = np.concatenate((updated_food_position, followers_position), axis=0)
 		updated_positions = position_update(positions=updated_salps_array, type='salp')
 
-	selected_feature_index = [x for x, y in list(enumerate(food_position)) if y == 1]
+	# print(type(food_position))
+	selected_feature_index = [x for x, y in enumerate(food_position[0].tolist()) if y == 1]
+	# print('selected_feature_index:', selected_feature_index)
+	# print('best_fitness:', best_fitness)
 
 	return selected_feature_index, best_fitness
 
@@ -165,18 +169,19 @@ if __name__ == '__main__':
 	indian_path = r'D:\Projections\datasource\hyperimage\Indian_pines\indian_pines_corrected.mat'
 	indian_gt_path = r'D:\Projections\datasource\hyperimage\Indian_pines\indian_pines_gt.mat'
 
-	# img_array = sio.loadmat(salinas_path)
+	iris = r'D:\Projections\datasource\commons\iris.csv'
+	iris_lb = r'D:\Projections\datasource\commons\iris_class.csv'
 
 	# print(img_array)
 	readimageInstance = ReadImage()
 
-	img_array = readimageInstance.funReadMat(imagePath=indian_path)
-	gt_array = readimageInstance.funReadMat(imagePath=indian_gt_path)
+	img_array = readimageInstance.funReadMat(imagePath=iris)
+	gt_array = readimageInstance.funReadMat(imagePath=iris_lb)
 
 	# reshape
-	img_array_reshaped = img_array.reshape((-1, img_array.shape[-1]))
+	# img_array_reshaped = img_array.reshape((-1, img_array.shape[-1]))
 	gt_array_reshaped = gt_array.reshape((-1,))
 
 	save_path = r'D:\Papers\result_collection\heuristic_algorithm\QSSA\{}'.format('50_100_ip_v3_for_test_2.txt')
-	reseult_dict = expriment_function(dataset=img_array_reshaped, labels=gt_array_reshaped, population=50, max_iter=50, trans_type=4, times=11, ub=1, lb=0, file_path=save_path)
+	reseult_dict = expriment_function(dataset=img_array, labels=gt_array_reshaped, population=50, max_iter=50, trans_type=7, times=10, ub=1, lb=0, file_path=save_path)
 	print(reseult_dict)
