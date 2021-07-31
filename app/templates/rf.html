@@ -54,6 +54,7 @@
                     <ul class="sub-menu-list">
                         <li><a href="{{ url_for('home.nefs') }}">邻域熵特征选择算法</a></li>
                         <li><a href="{{ url_for('home.qssafs') }}">量子樽海鞘特征选择算法</a></li>
+                        <li><a href="{{ url_for('home.download') }}">下载降维数据集</a></li>
                     </ul>
                 </li>
                 <li class="menu-list"><a href=""><i class="fa fa-laptop"></i> <span>分类实验</span></a>
@@ -128,7 +129,7 @@
 <!--                            </select>-->
                         </div>
                             <div class="form-group">
-                                <input type="number" class="form-control" name="test_set" placeholder="填写测试集比例">
+                                <input type="text" class="form-control" name="test_set" placeholder="填写测试集比例">
                             </div>
                             <div class="form-group">
                                 <input type="text" class="form-control" name="subset" placeholder="选填子集索引如:integer1, integer2,..., integerN, 不填写默认全特征">
@@ -146,14 +147,15 @@
                         </form>
                         <hr>
                             <button class="btn btn-primary" id="start-bg-job" type="submit">运行</button>
-                            <div id="progress" style="width: 100%; text-align: center; height: 50px"></div>
-
+                            <div id="progress" style="width: 100%; text-align: center; height: 300px"></div>
+                            <p>下载前请先完成分类实验</p>
+                            <button class="btn btn-primary" type="submit"><a href="{{ url_for('home.download_classifer') }}">下载分类结果</a></button>
                             <script src="//cdn.bootcss.com/nanobar/0.4.2/nanobar.min.js"></script>
                             <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
                             <script type="text/javascript">
                                 function start_long_task() {
                                     // add task status elements
-                                    var div = $('<div class="progress" style="height: 40px"><div></div>');
+                                    var div = $('<div class="progress" style="height: 200px"><div></div><div>0%</div><div>&nbsp;</div>');
                                     $('#progress').append(div);
 
                                     // create a progress bar
@@ -181,16 +183,16 @@
                                         // update UI
                                         percent = parseInt(data['current'] * 100 / data['total']);
                                         nanobar.go(percent);
-                                        // $(status_div.childNodes[1]).text(percent + '%');
+                                        $(status_div.childNodes[1]).text(percent + '%');
                                         // $(status_div.childNodes[2]).text(data['status']);
                                         if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
                                             if ('result' in data) {
                                                 // show result
-                                                $(status_div.childNodes[0]).text('任务完成: ' + data['result']);
+                                                $(status_div.childNodes[2]).text(data['result']);
                                             }
                                             else {
                                                 // something unexpected happened
-                                                $(status_div.childNodes[0]).text('任务完成: ' + data['state']);
+                                                $(status_div.childNodes[0]).text(data['state']);
                                             }
                                         }
                                         else {

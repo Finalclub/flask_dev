@@ -145,14 +145,16 @@
                             <hr>
                             <button class="btn btn-primary" id="start-bg-job" type="submit">运行</button>
                             <br><br>
-                            <div id="progress" style="width: 100%; text-align: center; height: 50px"></div>
+                            <div id="progress" style="width: 100%; text-align: center; height: 200px"></div>
+                            <p>下载前请先完成特征选择实验</p>
+                        <button class="btn btn-primary" type="submit"><a href="{{ url_for('home.download') }}">下载降维数据集</a></button>
                             <br><br>
                             <script src="//cdn.bootcss.com/nanobar/0.4.2/nanobar.min.js"></script>
                             <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
                             <script type="text/javascript">
                                 function start_long_task() {
                                     // add task status elements
-                                    var div = $('<div class="progress" style="height: 40px"><div></div>');
+                                    var div = $('<div class="progress" style="height: 150px"><div></div><div>0%</div><div>&nbsp;</div>');
                                     $('#progress').append(div);
 
                                     // create a progress bar
@@ -180,16 +182,16 @@
                                         // update UI
                                         percent = parseInt(data['current'] * 100 / data['total']);
                                         nanobar.go(percent);
-                                        // $(status_div.childNodes[0]).text(percent + '%');
+                                        $(status_div.childNodes[1]).text(percent + '%');
                                         // $(status_div.childNodes[0]).text(data['status']);
                                         if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
                                             if ('result' in data) {
                                                 // show result
-                                                $(status_div.childNodes[0]).text('选取索引集合: ' + data['result']);
+                                                $(status_div.childNodes[2]).text(data['result']);
                                             }
                                             else {
                                                 // something unexpected happened
-                                                $(status_div.childNodes[0]).text('Result: ' + data['state']);
+                                                $(status_div.childNodes[2]).text(data['state']);
                                             }
                                         }
                                         else {

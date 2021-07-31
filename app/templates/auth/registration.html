@@ -32,33 +32,14 @@
 
 
         <div class="login-wrap">
-         <!--   <p>Enter your personal details below</p>
-            <input type="text" autofocus="" placeholder="Full Name" class="form-control">
-            <input type="text" autofocus="" placeholder="Address" class="form-control">
-            <input type="text" autofocus="" placeholder="Email" class="form-control">
-            <input type="text" autofocus="" placeholder="City/Town" class="form-control">
-            <div class="radios">
-                <label for="radio-01" class="label_radio col-lg-6 col-sm-6">
-                    <input type="radio" checked="" value="1" id="radio-01" name="sample-radio"> Male
-                </label>
-                <label for="radio-02" class="label_radio col-lg-6 col-sm-6">
-                    <input type="radio" value="1" id="radio-02" name="sample-radio"> Female
-                </label>
-            </div> -->
+
 
             <p> 输入账号信息</p>
             <p>{{ form.user }} {{ form.user.errors[0] }}</p>
             <p>{{ form.pwd }} {{ form.pwd.errors[0] }}</p>
             <p>{{ form.pwd_confirm }} {{ form.pwd_confirm.errors[0] }}</p>
             <p>{{ form.email }} {{ form.email.errors[0] }}</p>
-
-    <!--        <input type="text" autofocus="" placeholder="User Name" class="form-control">
-            <input type="password" placeholder="Password" class="form-control">
-            <input type="password" placeholder="Re-type Password" class="form-control">
-            <input type="email" placeholder="email" class="form-control"> -->
-         <!--   <label class="checkbox">
-                <input type="checkbox" value="agree this condition"> I agree to the Terms of Service and Privacy Policy
-            </label>  -->
+            <p>{{ form.about_me }} {{ form.about_me.errors[0] }} </p>
             <div style="text-align:center" >
                     {{ form.submit() }}
             </div>

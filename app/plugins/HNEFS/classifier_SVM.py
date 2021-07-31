@@ -16,9 +16,10 @@ from sklearn.metrics import accuracy_score
 from app.plugins.LSH.readimage import ReadImage
 
 
-def classifierSVM(X, y, data_subset:list,  kernel='rbf', test_size=0.33):
+def classifierSVM(X, y, data_subset: list,  kernel='rbf', test_size=0.33):
 
-	if data_subset!=list():
+	if data_subset != list():
+		data_subset = [int(x) for x in data_subset]
 		X = X[:, data_subset]
 
 	sfs = SVC(kernel=kernel, probability=True)
@@ -61,12 +62,12 @@ if __name__ == '__main__':
 
 	readimageInstance = ReadImage()
 
-	img_array = readimageInstance.funReadMat(imagePath=indian_path)
-	gt_array = readimageInstance.funReadMat(imagePath=indian_gt_path)
+	img_array = readimageInstance.funReadMat(imagePath=iris)
+	gt_array = readimageInstance.funReadMat(imagePath=iris_lb)
 
 	# reshape
 	# img_array_reshaped = img_array.reshape((-1, img_array.shape[-1]))
 	gt_array = gt_array.reshape((-1,))
 
-	result_array, oa, kc = classifierSVM(img_array, gt_array, data_subset=[2, 177])
+	result_array, oa, kc = classifierSVM(img_array, gt_array, data_subset=[3])
 	print(result_array, oa, kc)

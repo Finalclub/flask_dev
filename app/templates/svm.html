@@ -60,7 +60,7 @@
                     <ul class="sub-menu-list">
                         <li class="active"><a href="{{ url_for('home.svm') }}">SVM</a></li>
                         <li><a href="{{ url_for('home.rf') }}">Random Forest</a></li>
-                        <li><a href="{{ url_for('home.knm') }}">KNN</a></li>
+                        <li><a href="{{ url_for('home.knn') }}">KNN</a></li>
                     </ul>
                 </li>
                 <li><a href="{{ url_for('home.user_infor', user=current_user.name) }}"><i class="fa fa-sign-in"></i> <span>用户信息管理</span></a></li>
@@ -117,18 +117,16 @@
                             {{ form.csrf_token }}
                         <div class="form-group">
                             <p class="help-block">选择数据集</p>
-<!--                            <select class="form-control input-sm m-bot15">-->
                                 {{ form.dataset(class='form-control form-control-lg') }}
 <!--                            </select>-->
                         </div>
                         <div class="form-group">
                             <p class="help-block">选择类标</p>
-<!--                            <select class="form-control input-sm m-bot15">-->
                                 {{ form.labels(class='form-control form-control-lg') }}
 <!--                            </select>-->
                         </div>
                             <div class="form-group">
-                                <input type="number" class="form-control" name="test_set" placeholder="填写测试集比例">
+                                <input type="text" class="form-control" name="test_set" placeholder="填写测试集比例">
                             </div>
                             <div class="form-group">
                                 <input type="text" class="form-control" name="subset" placeholder="选填子集索引如:integer1, integer2,..., integerN, 不填写默认全特征">
@@ -137,14 +135,20 @@
                         </form>
                         <hr>
                             <button class="btn btn-primary" id="start-bg-job" type="submit">运行</button>
-                            <div id="progress" style="width: 100%; text-align: center; height: 50px"></div>
-
+                            <div id="progress" style="width: 100%; text-align: center; height: 300px"></div>
+                            <p>下载前请先完成分类实验</p>
+                            <button class="btn btn-primary" type="submit"><a href="{{ url_for('home.download_classifer') }}">下载分类结果</a></button>
                             <script src="//cdn.bootcss.com/nanobar/0.4.2/nanobar.min.js"></script>
                             <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
                             <script type="text/javascript">
+                                var hour, minute, second;
+                                hour=minute=second=0;
+                                var mills=0;
+                                var int;
                                 function start_long_task() {
                                     // add task status elements
-                                    var div = $('<div class="progress" style="height: 40px"><div></div>');
+                                    // var div = $('<div class="progress" style="height: 200px"><div></div><div><input type="text" id="timetext" value="00h00m00s" readonly></div><div>0%</div><div>&nbsp;</div>');
+                                    var div = $('<div class="progress" style="height: 200px"><div></div><div>0%</div><div>&nbsp;</div>');
                                     $('#progress').append(div);
 
                                     // create a progress bar
@@ -152,7 +156,8 @@
                                         bg: '#44f',
                                         target: div[0].childNodes[0]
                                     });
-
+                                    // timer var
+                                    // int=setInterval(timer, 50);
                                     // send ajax POST request to start background job
                                     $.ajax({
                                         type: 'POST',
@@ -172,16 +177,18 @@
                                         // update UI
                                         percent = parseInt(data['current'] * 100 / data['total']);
                                         nanobar.go(percent);
-                                        // $(status_div.childNodes[1]).text(percent + '%');
+                                        $(status_div.childNodes[1]).text(percent + '%');
                                         // $(status_div.childNodes[2]).text(data['status']);
                                         if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
                                             if ('result' in data) {
                                                 // show result
-                                                $(status_div.childNodes[0]).text('任务完成: ' + data['result']);
+                                                // window.clearInterval(int);
+                                                $(status_div.childNodes[2]).text(data['result']);
                                             }
                                             else {
                                                 // something unexpected happened
-                                                $(status_div.childNodes[0]).text('任务完成: ' + data['state']);
+                                                // window.clearInterval(int);
+                                                $(status_div.childNodes[2]).text(data['state']);
                                             }
                                         }
                                         else {
@@ -189,8 +196,36 @@
                                             setTimeout(function() {
                                                 update_progress(status_url, nanobar, status_div);
                                             }, 2000);
+                                            stop();
                                         }
                                     });
+                                }
+                                function start()
+                                {
+
+                                    int=setInterval(timer, 50);
+                                }
+                                function timer()
+                                {
+                                    mills=mills+50;
+                                    if(mills>=1000){
+                                        mills=0;
+                                        second=second+1;
+                                    }
+                                    if(second>=60)
+                                    {
+                                        second=0;
+                                        minute=minute+1;
+                                    }
+                                    if(minute>=60){
+                                        minute=0;
+                                        hour=hour+1;
+                                    }
+                                    document.getElementById('timetext').value=hour+'h'+minute+'m'+second+'s';
+                                }
+                                function stop()
+                                {
+                                    window.clearInterval(int);
                                 }
                                 $(function() {
                                     $('#start-bg-job').click(start_long_task);

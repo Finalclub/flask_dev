@@ -6,9 +6,9 @@
 # @File   : forms.py
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
 from wtforms import widgets
-from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
+from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length
 from wtforms.fields import html5
 from app.models import User
 
@@ -70,6 +70,8 @@ class RegisterForm(FlaskForm):
 		widget=widgets.TextInput(),
 		render_kw={'class': 'form-control', 'placeholder': '请输入邮箱'}
 	)
+	about_me = TextAreaField('About me', validators=[Length(min=0, max=140)],
+							 render_kw={'class': 'form-control', 'placeholder': '请输入个人描述'})
 	submit = SubmitField('提交')
 
 	def __init__(self, *args, **kwargs):
@@ -86,4 +88,42 @@ class RegisterForm(FlaskForm):
 		user = User.query.filter_by(name=user.data).first()
 		if user is not None:
 			raise ValidationError('用户名已存在')
+
+
+class EditForm(FlaskForm):
+	user = StringField(
+		validators=[
+			DataRequired()
+		],
+		widget=widgets.TextInput(),
+		render_kw={'class': 'form-control', 'placeholder': '请输入用户名'},
+	)
+	pwd = PasswordField(
+		validators=[
+			DataRequired(message='密码不能为空.')
+		],
+		widget=widgets.PasswordInput(),
+		render_kw={'class': 'form-control', 'placeholder': '请输入密码'}
+	)
+
+	pwd_confirm = PasswordField(
+		validators=[
+			DataRequired(message='重复密码不能为空.'),
+			EqualTo('pwd', message="两次密码输入不一致")
+		],
+		widget=widgets.PasswordInput(),
+		render_kw={'class': 'form-control', 'placeholder': '请再次输入密码'}
+	)
+	email = html5.EmailField(
+		validators=[
+			DataRequired(message='邮箱不能为空.'),
+			Email(message='邮箱格式错误')
+		],
+		widget=widgets.TextInput(),
+		render_kw={'class': 'form-control', 'placeholder': '请输入邮箱'}
+	)
+	about_me = TextAreaField('About me',
+							 validators=[Length(min=0, max=140)],
+							 render_kw={'class': 'form-control', 'placeholder': '请输入个人描述'})
+	submit = SubmitField('提交')
 

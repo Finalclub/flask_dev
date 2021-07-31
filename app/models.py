@@ -5,12 +5,7 @@
 # @Author : Dong
 # @File   : models.py
 
-from datetime import datetime, timedelta
-from hashlib import md5
-import json
-import os
-from time import time
-from flask import current_app, url_for
+from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 # import jwt
@@ -25,6 +20,7 @@ class User(UserMixin, db.Model):
 	name = db.Column(db.String(64), unique=True)
 	pwd_hash = db.Column(db.String(128))
 	email = db.Column(db.String(120))
+	about_me = db.Column(db.TEXT)
 	type = db.Column(db.Integer, db.ForeignKey('auth.id_auth'), default=0)
 	last_seen = db.Column(db.DateTime, default=datetime.now)
 	# auths = db.relationship('Auth', backref='auth', lazy='select')

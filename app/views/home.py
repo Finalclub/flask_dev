@@ -6,10 +6,11 @@
 # @File   : home.py
 
 from flask import Blueprint,render_template, request, redirect, \
-	 url_for, jsonify
+	 url_for, jsonify, send_from_directory
 from flask_login import current_user, login_required, logout_user
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import CombinedMultiDict
+from werkzeug.security import generate_password_hash
 from operator import truediv
 from sklearn.model_selection import train_test_split
 from sklearn.multiclass import OneVsOneClassifier
@@ -22,6 +23,7 @@ from sklearn.metrics import accuracy_score
 from app.models import User, Dataset
 from app.utils.SQL import SQLHelper
 from app import db, celery
+from app.auth.forms import EditForm
 from app.main.forms import UploadForms, SelectDSForm, SelectDSFormSSA, \
 	SelectDSFormSVM, SelectDSFormRF, SelectDSFormKNN
 from app.plugins.LSH.readimage import ReadImage
@@ -38,9 +40,11 @@ hm = Blueprint('home', __name__)
 
 file_reader = ReadImage()
 
+data_path = None
 result_nefs = None
 result_ssa = None
 result_classifier = None
+response_result = None
 
 
 @celery.task(bind=True)
@@ -55,6 +59,7 @@ def backgroundNE_task(self, X, Y, k, w, L, n_bands):
 	# len_s = len(S)
 	band_index_list = [x for x in range(D)]
 	# while len(S) < n_bands:
+	tic  = time.time()
 	for i in range(n_bands):
 		# len_s = len(S)
 		set_for_search = set(band_index_list) - set(S)
@@ -75,9 +80,10 @@ def backgroundNE_task(self, X, Y, k, w, L, n_bands):
 		message = 'progressing'
 		self.update_state(state='PROGRESS', meta={'current': i, 'total': n_bands, 'status': message})
 		time.sleep(1)
-
+	toc = time.time()
 	# int_list = [int(x) for x in S]
-	return {'current': len(S), 'total': n_bands, 'status': '任务完成', 'result': str(S)}
+	result = 'Selected: {}  Cost:{}s'.format(S, toc - tic)
+	return {'current': len(S), 'total': n_bands, 'status': '任务完成', 'result': result}
 
 
 @celery.task(bind=True)
@@ -88,29 +94,37 @@ def backgroundSSA_task(self, dataset, labels, population, max_iter, times):
 		Y = to_array(labels)
 	fitness_list = list()
 	index_list = list()
+	tic = time.time()
 	for i in range(times):
 		selected, best_fitness = QSSA(n_population=population, max_iter=max_iter, dataset=X, labels=Y, trans_type=7, ub=1, lb=0)
 		index_list.append(selected)
 		fitness_list.append(best_fitness)
 		message = 'progressing'
 		self.update_state(state='PROGRESS',
-                          meta={'current': i, 'total': times, 'status': message})
+							meta={'current': i, 'total': times, 'status': message})
 		time.sleep(1)
+	toc = time.time()
 	avg = np.mean(fitness_list)
 	std = np.std(fitness_list, ddof=1)
 	worst = max(fitness_list)
 	best = min(fitness_list)
 	best_index = index_list[fitness_list.index(best)]
-	results = 'Avg:{} Std:{} Best:{} Worst:{} \nSelected: {}'.format(avg, std, best, worst, best_index)
+	results = 'Avg:{}   Std:{}   Best:{}   Worst:{}   Selected: {}  Cost:{}s'.format(avg, std, best, worst,
+																					best_index, toc - tic)
 	return {'current': 100, 'total': 100, 'status': 'Task completed!', 'result': results}
 
 
 @celery.task(bind=True)
 def backgroundsvm_task(self, X, y, test_size, subset: list, kernel='rbf'):
+	if isinstance(X, str):
+		X = to_array(X)
+	if isinstance(y, str):
+		y = to_array(y)
 	if subset != list():
+		subset = [int(x) for x in subset]
 		X = X[:, subset]
-
 	sfs = SVC(kernel=kernel, probability=True)
+	tic = time.time()
 	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, shuffle=True, random_state=0)
 	self.update_state(state='PROGRESS', meta={'current': 1, 'total': 4, 'status': 'processing'})
 	clf = OneVsOneClassifier(sfs).fit(X_train, y_train)
@@ -137,19 +151,25 @@ def backgroundsvm_task(self, X, y, test_size, subset: list, kernel='rbf'):
 	kc = cohen_kappa_score(y1=y_test, y2=y_pre, labels=labels)
 
 	each_acc_result = str(each_acc_list).replace('[', '').replace(']', '')
-	results = 'OA:{}  KC:{} \nAccuracy of each label(default index): {}'.format(oa, kc, each_acc_result)
+	toc = time.time()
+	results = 'OA:{}  KC:{}  Accuracy of each label(default index): {}  Cost:{}s'.format(oa, kc, each_acc_result, toc - tic)
 	return {'current': 1, 'total': 1, 'status': 'Task completed!', 'result': results}
 
 
 @celery.task(bind=True)
 def backgroundrf_task(self, X, y, test_size, subset: list, n_estimators, min_samples_split, min_samples_leaf):
+	if isinstance(X, str):
+		X = to_array(X)
+	if isinstance(y, str):
+		y = to_array(y)
 	if subset != list():
+		subset = [int(x) for x in subset]
 		X = X[:, subset]
-
 	sfs = RandomForestClassifier(n_estimators=n_estimators,
 								 min_samples_split=min_samples_split,
 								 min_samples_leaf=min_samples_leaf)
 
+	tic = time.time()
 	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, shuffle=True, random_state=0)
 	self.update_state(state='PROGRESS', meta={'current': 1, 'total': 4, 'status': 'processing'})
 	clf = OneVsOneClassifier(sfs).fit(X_train, y_train)
@@ -174,15 +194,21 @@ def backgroundrf_task(self, X, y, test_size, subset: list, n_estimators, min_sam
 	kc = cohen_kappa_score(y1=y_test, y2=y_pre, labels=labels)
 
 	each_acc_result = str(each_acc_list).replace('[', '').replace(']', '')
-	results = 'OA:{}  KC:{} \nAccuracy of each label(default index): {}'.format(oa, kc, each_acc_result)
+	toc = time.time()
+	results = 'OA:{}  KC:{}  Accuracy of each label(default index): {}  Cost:{}s'.format(oa, kc, each_acc_result, toc - tic)
 	return {'current': 1, 'total': 1, 'status': 'Task completed!', 'result': results}
 
 
 @celery.task(bind=True)
 def backgroundknn_task(self, X, y, test_size, subset: list, n_neighbors):
+	if isinstance(X, str):
+		X = to_array(X)
+	if isinstance(y, str):
+		y = to_array(y)
 	if subset != list():
+		subset = [int(x) for x in subset]
 		X = X[:, subset]
-
+	tic = time.time()
 	sfs = KNeighborsClassifier(n_neighbors=n_neighbors)
 	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, shuffle=True, random_state=0)
 	self.update_state(state='PROGRESS', meta={'current': 1, 'total': 4, 'status': 'processing'})
@@ -206,7 +232,9 @@ def backgroundknn_task(self, X, y, test_size, subset: list, n_neighbors):
 	self.update_state(state='PROGRESS', meta={'current': 3, 'total': 4, 'status': 'processing'})
 	kc = cohen_kappa_score(y1=y_test, y2=y_pre, labels=labels)
 	each_acc_result = str(each_acc_list).replace('[', '').replace(']', '')
-	results = 'OA:{}  KC:{} \nAccuracy of each label(default index): {}'.format(oa, kc, each_acc_result)
+	toc = time.time()
+	results = 'OA:{}  KC:{}  Accuracy of each label(default index): {}  Cost:{}s'.format(oa, kc, each_acc_result,
+																						 toc - tic)
 	return {'current': 1, 'total': 1, 'status': 'Task completed!', 'result': results}
 
 
@@ -221,6 +249,27 @@ def before_request():
 @login_required
 def index():
 	return render_template('index.html')
+
+
+@hm.route('/edit_profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+	form = EditForm()
+	if form.validate_on_submit():
+		name = form.user.data
+		pwd_hash = generate_password_hash(form.pwd.data)
+		email = form.email.data
+		about_me = form.about_me.data
+		query = '''update user set name='{}', pwd_hash='{}', email='{}', about_me='{}' where id={}'''
+		query = query.format(name, pwd_hash, email, about_me, current_user.id)
+		print(query)
+		SQLHelper.write_db(query)
+		return redirect(url_for('home.user_infor', user=name))
+	elif request.method == 'GET':
+		form.user.data = current_user.name
+		form.about_me.data = current_user.about_me
+		form.email.data = current_user.email
+	return render_template('edit_page.html', form=form)
 
 
 @hm.route('/index/user_infor/<user>', methods=['GET', 'POST'])
@@ -279,10 +328,12 @@ def nefs():
 	form = SelectDSForm()
 	if request.method == 'POST':
 		if form.validate_on_submit():
+			global data_path
 			db_path, lb_path, k, w, L, n_bands = get_algorithm_args(form, type='ne')
 			X, y = get_data(db_path[0], lb_path[0])
 			global result_nefs
 			result_nefs = [X, y, k, w, L, n_bands]
+			data_path = db_path
 			return '成功提交，可以执行算法'
 	return render_template('nebs.html', form=form)
 
@@ -321,7 +372,9 @@ def nefsstatus(task_id):
 			'status': task.info.get('status', '')
 		}
 		if 'result' in task.info:
+			global response_result
 			response['result'] = task.info['result']
+			response_result = task.info['result']
 	else:
 		# 后端出现问题
 		response = {'state': task.state, 'current': 1, 'total': 1, 'status': str(task.info)}
@@ -336,9 +389,11 @@ def qssafs():
 	if request.method == 'POST':
 		if form.validate_on_submit():
 			global result_ssa
+			global data_path
 			db_path, lb_path, pop, max_iter, times = get_algorithm_args(form, type='ssa')
 			X, y = get_data(db_path[0], lb_path[0])
 			result_ssa = [X, y, pop, max_iter, times]
+			data_path = db_path
 			return '成功提交，可以执行算法'
 	return render_template('qssa.html', form=form)
 
@@ -376,7 +431,9 @@ def qssastatus(task_id):
 			'status': task.info.get('status', '')
 		}
 		if 'result' in task.info:
+			global response_result
 			response['result'] = task.info['result']
+			response_result = task.info['result']
 	else:
 		# something went wrong in the background job
 		response = {
@@ -388,6 +445,39 @@ def qssastatus(task_id):
 	return jsonify(response)
 
 
+@hm.route('/download_fs')
+@login_required
+def download_fs():
+	global response_result
+	if response_result is not None:
+		index = response_result.split('[')[-1].split(']')[0]
+		index_list = [int(x) for x in index.split(',')]
+		global data_path
+		X = file_reader.funReadMat(data_path[0])
+		X_reduction = X[:, index_list]
+		server_path = os.path.join(os.path.split(os.path.dirname(__file__))[0], 'download')
+		file_name = os.path.basename(data_path[0]).split('.')[0]
+		newfile_name = '{}_{}_redution.csv'.format(file_name, len(index_list))
+		abs_path = os.path.join(server_path, newfile_name)
+		np.savetxt(abs_path, X_reduction, delimiter=',')
+		return send_from_directory(server_path, newfile_name, as_attachment=True)
+
+
+@hm.route('/download_classifer')
+@login_required
+def download_classifer():
+	global response_result
+	if response_result is not None:
+		global data_path
+		server_path = os.path.join(os.path.split(os.path.dirname(__file__))[0], 'download')
+		file_name = os.path.basename(data_path).split('.')[0]
+		newfile_name = '{}_classifier_result.txt'.format(file_name)
+		abs_path = os.path.join(server_path, newfile_name)
+		with open(abs_path, 'w') as file:
+			file.writelines(response_result)
+		return send_from_directory(server_path, newfile_name, as_attachment=True)
+
+
 @hm.route('/classifer_svm', methods=['GET', 'POST'])
 @login_required
 def svm():
@@ -395,21 +485,23 @@ def svm():
 	if request.method == 'POST':
 		if form.validate_on_submit():
 			global result_classifier
+			global data_path
 			db_path, lb_path, test_set, subset = get_algorithm_args(form, type='svm')
 			X, y = get_data(db_path[0], lb_path[0])
 			subset = subset.replace('[', '').replace(']', '')
 			subset_list = subset.split(',')
-			if subset_list != list():
-				subset_list = [int(x) for x in subset_list]
-				result_classifier = [X, y, test_set, subset_list]
-			else:
+			if subset_list[0] == '':
 				subset_list = list()
-				result_classifier = [X, y, test_set, subset_list]
-				return '成功提交，可以执行算法'
+			result_classifier = [X, y, test_set, subset_list]
+			data_path = db_path[0]
+			return '成功提交，可以执行算法'
+		else:
+			print(form.errors)
 	return render_template('svm.html', form=form)
 
 
 @hm.route('/svm_task', methods=['POST'])
+@login_required
 def svmtask():
 	global result_classifier
 	task = backgroundsvm_task.apply_async(
@@ -424,6 +516,7 @@ def svmtask():
 
 
 @hm.route('/svm_status/<task_id>')
+@login_required
 def svmstatus(task_id):
 	task = backgroundsvm_task.AsyncResult(task_id)
 	if task.state == 'PENDING':
@@ -442,6 +535,8 @@ def svmstatus(task_id):
 		}
 		if 'result' in task.info:
 			response['result'] = task.info['result']
+			global response_result
+			response_result = task.info['result']
 	else:
 		# something went wrong in the background job
 		response = {
@@ -460,20 +555,21 @@ def rf():
 	if request.method == 'POST':
 		if form.validate_on_submit():
 			global result_classifier
+			global data_path
 			db_path, lb_path, test_set, subset, ntree, nsp, lsp = get_algorithm_args(form, type='rf')
 			X, y = get_data(db_path[0], lb_path[0])
 			subset = subset.replace('[', '').replace(']', '')
 			subset_list = subset.split(',')
-			if subset_list != list():
-				subset_list = [int(x) for x in subset_list]
-			else:
+			if subset_list[0] == '':
 				subset_list = list()
 			result_classifier = [X, y, test_set, subset_list, ntree, nsp, lsp]
+			data_path = db_path[0]
 			return '成功提交，可以执行算法'
 	return render_template('rf.html', form=form)
 
 
 @hm.route('/rf_task', methods=['POST'])
+@login_required
 def rftask():
 	global result_classifier
 	task = backgroundrf_task.apply_async(
@@ -491,6 +587,7 @@ def rftask():
 
 
 @hm.route('/rf_status/<task_id>')
+@login_required
 def rfstatus(task_id):
 	task = backgroundrf_task.AsyncResult(task_id)
 	if task.state == 'PENDING':
@@ -509,6 +606,8 @@ def rfstatus(task_id):
 		}
 		if 'result' in task.info:
 			response['result'] = task.info['result']
+			global response_result
+			response_result = task.info['result']
 	else:
 		# something went wrong in the background job
 		response = {
@@ -527,20 +626,21 @@ def knn():
 	if request.method == 'POST':
 		if form.validate_on_submit():
 			global result_classifier
+			global data_path
 			db_path, lb_path, test_set, subset, k = get_algorithm_args(form, type='knn')
 			X, y = get_data(db_path[0], lb_path[0])
 			subset = subset.replace('[', '').replace(']', '')
 			subset_list = subset.split(',')
-			if subset_list != list():
-				subset_list = [int(x) for x in subset_list]
-			else:
+			if subset_list[0] == '':
 				subset_list = list()
 			result_classifier = [X, y, test_set, subset_list, k]
+			data_path = db_path[0]
 			return '成功提交，可以执行算法'
 	return render_template('knn.html', form=form)
 
 
 @hm.route('/knn_task', methods=['POST'])
+@login_required
 def knntask():
 	global result_classifier
 	task = backgroundknn_task.apply_async(
@@ -556,6 +656,7 @@ def knntask():
 
 
 @hm.route('/knn_status/<task_id>')
+@login_required
 def knnstatus(task_id):
 	task = backgroundknn_task.AsyncResult(task_id)
 	if task.state == 'PENDING':
@@ -574,6 +675,9 @@ def knnstatus(task_id):
 		}
 		if 'result' in task.info:
 			response['result'] = task.info['result']
+			global response_result
+			response_result = task.info['result']
+
 	else:
 		# something went wrong in the background job
 		response = {

@@ -139,8 +139,13 @@ def QSSA(n_population, max_iter, dataset, labels, trans_type, ub, lb):
 		updated_salps_array = np.concatenate((updated_food_position, followers_position), axis=0)
 		updated_positions = position_update(positions=updated_salps_array, type='salp')
 
-	# print(type(food_position))
-	selected_feature_index = [x for x, y in enumerate(food_position[0].tolist()) if y == 1]
+	print((food_position))
+	try:
+		print(1)
+		selected_feature_index = [x for x, y in enumerate(food_position[0].tolist()) if y == 1]
+	except:
+		print(2)
+		selected_feature_index = [x for x, y in enumerate(food_position.tolist()) if y == 1]
 	# print('selected_feature_index:', selected_feature_index)
 	# print('best_fitness:', best_fitness)
 

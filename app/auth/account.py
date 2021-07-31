@@ -64,7 +64,7 @@ def register():
 	form = RegisterForm()
 	if form.validate_on_submit():
 		# print(form.data)
-		user = User(name=form.user.data, email=form.email.data)
+		user = User(name=form.user.data, email=form.email.data, about_me=form.about_me.data)
 		user.set_password(form.pwd.data)
 		# print(user)
 		# print(User.pwd_hash)
@@ -73,10 +73,10 @@ def register():
 		flash('注册成功！')
 		return redirect('/login')
 	else:
-		print(2,form.user.errors)
-		print(2,form.pwd.errors)
-		print(2,form.pwd_confirm.errors)
-		print(2,form.email.errors)
+		print(2, form.user.errors)
+		print(2, form.pwd.errors)
+		print(2, form.pwd_confirm.errors)
+		print(2, form.email.errors)
 		print('something happened')
 
 	return render_template('auth/registration.html', form=form)

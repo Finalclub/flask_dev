@@ -67,4 +67,5 @@ def classifierRF(X, y, data_subset:list,  n_estimators=100, min_samples_split=2,
 # 所以需要想一下这个地方界面怎么做比较好，就是可以提供输入几个数字作为list，也可以不输入直接拿读取的数据集分类
 if __name__ == '__main__':
 
-	print(classifierRF(X, y, data_subset=[5,9,20,14]))
+	a = np.random.randint(0, 4, (4, 10))
+	print(a)

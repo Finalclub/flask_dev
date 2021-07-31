@@ -104,12 +104,126 @@
 
         </div>
         <!-- header section end-->
-
+        <div class="page-heading">
+            <h3>
+                平台简介
+            </h3>
+        </div>
 
 
         <!--body wrapper start-->
         <div class="wrapper">
+            <div class="row">
+            <div class="col-md-8">
+            <section class="panel">
+                <header class="panel-heading">
+                    主要功能 <span class="text-muted">简述</span>
+                        <span class="tools pull-right">
+                            <a class="fa fa-chevron-down" href="javascript:;"></a>
 
+                         </span>
+                </header>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h3>数据集上传</h3>
+                        </div>
+                        <div class="col-md-6">
+                            <h3>注意事项</h3>
+                            <p class="muted">
+                                平台默认处理数据集格式为.mat以及.csv文件，上传前请完成数据集的预处理。
+                            </p>
+                            <p class="text-warning">
+                                成功上传的数据集可以在数据集信息页面查看。
+                            </p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h3>特征选择实验</h3>
+                            <p class="lead">
+                                基于邻域熵以及二进制量子樽海鞘算法的特征选择算法
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h3>Tips</h3>
+                            <p>
+                                选取已经上传的数据集。本实验均采用有监督的模型，数据集和类标需要统一选取， 如果不匹配，请检查并重新上传
+                            </p>
+                            <p>
+                                考虑到实验的运行时常问题，内置Celery分布式任务队列进行后台调度
+                            </p>
+                            <p>
+                                但是任然建议执行单次任务
+                            </p>
+                        </div>
+                    </div>
+                    <hr>
+                                        <div class="row">
+                        <div class="col-md-6">
+                            <h3>分类实验</h3>
+                            <p class="lead">
+                                采用SVM, Random Forest, KNN作为默认分类器
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h3>Tips</h3>
+                            <p>
+                                选取已经上传的数据集，数据集和类标需要统一选取，如果不匹配，请检查并重新上传
+                            </p>
+                            <p class="text-warning">
+                                测试集比例在0到1的区间内选取
+                            </p>
+                            <p>
+                                提供选取特征子集进行分类实验，可以根据特征选择实验的结果，或者自定义来获取OA和KC值，并返回每个类的分类精度。
+                            </p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h3>Address</h3>
+                            <div class="well">
+                                <address>
+                                    <strong>ThemeBucket</strong><br>
+                                    Pudong New Area<br>
+                                    Shanghai, Chnia <br>
+<!--                                    <abbr title="Phone">P:</abbr> (123) 456-7890 -->
+                                </address>
+                                <address>
+                                    <strong>Luka Zhai</strong><br>
+                                    <a href="mailto:/#/">
+                                        lukadongcici@163.com
+                                    </a>
+                                    <br>
+                                    <br>
+                                </address>
+                            </div>
+                        </div>
+<!--                        <div class="col-md-6">-->
+<!--                            <h3>希望提出宝贵的意见</h3>-->
+<!--                            <p>-->
+<!--                                您宝贵的意见是我持续改进的动力-->
+<!--                            </p>-->
+<!--                            <hr>-->
+<!--                            <h4> Alignments </h4>-->
+<!--                            <p class="text-left">-->
+<!--                                Left aligned text.-->
+<!--                            </p>-->
+<!--                            <p class="text-center">-->
+<!--                                Center aligned text.-->
+<!--                            </p>-->
+<!--                            <p class="text-right">-->
+<!--                                Right aligned text.-->
+<!--                            </p>-->
+<!--                        </div>-->
+                    </div>
+                    <hr>
+                </div>
+            </section>
+        </div>
+        </div>
         </div>
     </div>
         <!--body wrapper end-->

@@ -42,8 +42,7 @@ class SelectDSForm(FlaskForm):
 
 	def __init__(self):
 		super(SelectDSForm, self).__init__()
-		self.labels.choices = SQLHelper.fetch_all('select id, name from dataset where dataset_type=1')
-		self.labels.choices = SQLHelper.fetch_all('select id, name from dataset where dataset_type=2')
+		self.dataset.choices = SQLHelper.fetch_all('select id, name from dataset where dataset_type=1')
 
 
 class SelectDSFormSSA(FlaskForm):
@@ -61,7 +60,7 @@ class SelectDSFormSSA(FlaskForm):
 
 	def __init__(self):
 		super(SelectDSFormSSA, self).__init__()
-		self.labels.choices = SQLHelper.fetch_all('select id, name from dataset where dataset_type=1')
+		self.dataset.choices = SQLHelper.fetch_all('select id, name from dataset where dataset_type=1')
 		self.labels.choices = SQLHelper.fetch_all('select id, name from dataset where dataset_type=2')
 
 
@@ -79,7 +78,7 @@ class SelectDSFormSVM(FlaskForm):
 
 	def __init__(self):
 		super(SelectDSFormSVM, self).__init__()
-		self.labels.choices = SQLHelper.fetch_all('select id, name from dataset where dataset_type=1')
+		self.dataset.choices = SQLHelper.fetch_all('select id, name from dataset where dataset_type=1')
 		self.labels.choices = SQLHelper.fetch_all('select id, name from dataset where dataset_type=2')
 
 
@@ -100,7 +99,7 @@ class SelectDSFormRF(FlaskForm):
 
 	def __init__(self):
 		super(SelectDSFormRF, self).__init__()
-		self.labels.choices = SQLHelper.fetch_all('select id, name from dataset where dataset_type=1')
+		self.dataset.choices = SQLHelper.fetch_all('select id, name from dataset where dataset_type=1')
 		self.labels.choices = SQLHelper.fetch_all('select id, name from dataset where dataset_type=2')
 
 
@@ -119,8 +118,21 @@ class SelectDSFormKNN(FlaskForm):
 
 	def __init__(self):
 		super(SelectDSFormKNN, self).__init__()
-		self.labels.choices = SQLHelper.fetch_all('select id, name from dataset where dataset_type=1')
+		self.dataset.choices = SQLHelper.fetch_all('select id, name from dataset where dataset_type=1')
 		self.labels.choices = SQLHelper.fetch_all('select id, name from dataset where dataset_type=2')
+
+
+class FileDownload(FlaskForm):
+		dataset = core.SelectField(
+			choices=SQLHelper.fetch_all('select id, name from dataset where dataset_type=1')
+		)
+
+		subset = StringField(validators=[InputRequired('填写特征子集')], default='')
+		submit = SubmitField(u'瞎子啊')
+
+		def __init__(self):
+			super(FileDownload, self).__init__()
+			self.dataset.choices = SQLHelper.fetch_all('select id, name from dataset where dataset_type=1')
 
 
 # debug

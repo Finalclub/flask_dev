@@ -42,11 +42,11 @@
 
         <!--logo and iconic logo start-->
         <div class="logo">
-            <a href="{{ url_for('home.index') }}"><img src="../static/images/logo.png" alt=""></a>
+            <a href="{{ url_for('home.index') }}"><img src="/static/images/logo.png" alt=""></a>
         </div>
 
         <div class="logo-icon text-center">
-            <a href="{{ url_for('home.index') }}"><img src="../static/images/logo_icon.png" alt=""></a>
+            <a href="{{ url_for('home.index') }}"><img src="/static/images/logo_icon.png" alt=""></a>
         </div>
         <!--logo and iconic logo end-->
 
@@ -108,14 +108,17 @@
             <h3>
                 当前用户: {{ user.name }}
             </h3>
-            {% if user.last_seen %}<p>上次登录: {{ user.last_seen }}</p>{% endif %}
+
         </div>
         <!-- page heading end-->
 
 
         <!--body wrapper start-->
         <div class="wrapper">
-
+            {% if user.about_me %}<p>关于我: {{ user.about_me }}</p>{% endif %}
+            {% if user.email %}<p>用户邮箱: {{ user.email }}</p>{% endif %}
+            {% if user.last_seen %}<p>上次登录: {{ user.last_seen }}</p>{% endif %}
+            {% if user == current_user %} <p><a href="{{ url_for('home.edit_profile') }}">编辑个人信息</a></p> {% endif %}
         </div>
 
         </div>
